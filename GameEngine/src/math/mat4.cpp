@@ -44,6 +44,35 @@ namespace Taurus
 			return *this;
 		}
 
+		vec4 operator*(mat4 left, const vec4& right)
+		{
+			// 0x + 4y + 8z + 12w
+			float x =
+				left.elements[0] * right.x +
+				left.elements[4] * right.y +
+				left.elements[8] * right.z +
+				left.elements[12] * right.w;
+			// 1x + 5y + 9z + 13w
+			float y =
+				left.elements[1] * right.x +
+				left.elements[5] * right.y +
+				left.elements[9] * right.z +
+				left.elements[13] * right.w;
+			// 2x + 6y + 10z + 14w
+			float z = 
+				left.elements[2] * right.x +
+				left.elements[6] * right.y +
+				left.elements[10] * right.z +
+				left.elements[14] * right.w;
+			// 3x + 7y + 11z + 15w
+			float w = 
+				left.elements[3] * right.x +
+				left.elements[7] * right.y +
+				left.elements[11] * right.z +
+				left.elements[15] * right.w;
+			return vec4(x, y, z, w);
+		}
+
 		mat4 operator*(mat4 left, const mat4& right)
 		{
 			return left.multiply(right);
@@ -73,10 +102,11 @@ namespace Taurus
 		{
 			mat4 result(1.0f);
 
+			/*
 			float q = 1.0f / tan(toRadians(0.5f * fov));
 			float a = q / aspectRatio;
 
-			float b = (near + far) / (near - far);
+			float b = -(near + far) / (near - far);
 			float c = (2.0f * near * far) / (near - far);
 
 
@@ -85,6 +115,32 @@ namespace Taurus
 			result.elements[2 + 2 * 4] = b;
 			result.elements[3 + 2 * 4] = -1.0f;
 			result.elements[2 + 3 * 4] = c;
+			*/
+
+			// input variables
+			//float near = 0.1f; // clipping plane
+			//float far = 100.0f; // clipping plane
+														 // matrix components
+			fov = toRadians(fov);
+			float range = tan(fov * 0.5f) * near;
+			float Sx = (2.0f * near) / (range * aspectRatio + range * aspectRatio);
+			float Sy = near / range;
+			float Sz = -(far + near) / (far - near);
+			float Pz = -(2.0f * far * near) / (far - near);
+
+			/**
+			float proj_mat[] = {
+				Sx, 0.0f, 0.0f, 0.0f,
+				0.0f, Sy, 0.0f, 0.0f,
+				0.0f, 0.0f, Sz, -1.0f,
+				0.0f, 0.0f, Pz, 0.0f
+			};*/
+
+			result.elements[0 + 0 * 4] = Sx;
+			result.elements[1 + 1 * 4] = Sy;
+			result.elements[2 + 2 * 4] = Sz;
+			result.elements[3 + 2 * 4] = -1.0f;
+			result.elements[2 + 3 * 4] = Pz;
 
 			return result;
 		}
@@ -137,6 +193,129 @@ namespace Taurus
 			result.elements[2 + 2 * 4] = scale.z;
 
 			return result;
+		}
+
+		float mat4::determinant(const mat4& mm) {
+			return
+				mm.elements[12] * mm.elements[9] * mm.elements[6] * mm.elements[3] -
+				mm.elements[8] * mm.elements[13] * mm.elements[6] * mm.elements[3] -
+				mm.elements[12] * mm.elements[5] * mm.elements[10] * mm.elements[3] +
+				mm.elements[4] * mm.elements[13] * mm.elements[10] * mm.elements[3] +
+				mm.elements[8] * mm.elements[5] * mm.elements[14] * mm.elements[3] -
+				mm.elements[4] * mm.elements[9] * mm.elements[14] * mm.elements[3] -
+				mm.elements[12] * mm.elements[9] * mm.elements[2] * mm.elements[7] +
+				mm.elements[8] * mm.elements[13] * mm.elements[2] * mm.elements[7] +
+				mm.elements[12] * mm.elements[1] * mm.elements[10] * mm.elements[7] -
+				mm.elements[0] * mm.elements[13] * mm.elements[10] * mm.elements[7] -
+				mm.elements[8] * mm.elements[1] * mm.elements[14] * mm.elements[7] +
+				mm.elements[0] * mm.elements[9] * mm.elements[14] * mm.elements[7] +
+				mm.elements[12] * mm.elements[5] * mm.elements[2] * mm.elements[11] -
+				mm.elements[4] * mm.elements[13] * mm.elements[2] * mm.elements[11] -
+				mm.elements[12] * mm.elements[1] * mm.elements[6] * mm.elements[11] +
+				mm.elements[0] * mm.elements[13] * mm.elements[6] * mm.elements[11] +
+				mm.elements[4] * mm.elements[1] * mm.elements[14] * mm.elements[11] -
+				mm.elements[0] * mm.elements[5] * mm.elements[14] * mm.elements[11] -
+				mm.elements[8] * mm.elements[5] * mm.elements[2] * mm.elements[15] +
+				mm.elements[4] * mm.elements[9] * mm.elements[2] * mm.elements[15] +
+				mm.elements[8] * mm.elements[1] * mm.elements[6] * mm.elements[15] -
+				mm.elements[0] * mm.elements[9] * mm.elements[6] * mm.elements[15] -
+				mm.elements[4] * mm.elements[1] * mm.elements[10] * mm.elements[15] +
+				mm.elements[0] * mm.elements[5] * mm.elements[10] * mm.elements[15];
+		}
+
+		mat4 mat4::inverse(const mat4& mm) {
+			float det = determinant(mm);
+			/* there is no inverse if determinant is zero (not likely unless scale is
+			broken) */
+			if (0.0f == det) {
+				fprintf(stderr, "WARNING. matrix has no determinant. can not invert\n");
+				return mm;
+			}
+			float inv_det = 1.0f / det;
+
+			mat4 m;
+			m.elements[0] = inv_det * (
+				mm.elements[9] * mm.elements[14] * mm.elements[7] - mm.elements[13] * mm.elements[10] * mm.elements[7] +
+				mm.elements[13] * mm.elements[6] * mm.elements[11] - mm.elements[5] * mm.elements[14] * mm.elements[11] -
+				mm.elements[9] * mm.elements[6] * mm.elements[15] + mm.elements[5] * mm.elements[10] * mm.elements[15]
+				);
+			m.elements[1] = inv_det * (
+				mm.elements[13] * mm.elements[10] * mm.elements[3] - mm.elements[9] * mm.elements[14] * mm.elements[3] -
+				mm.elements[13] * mm.elements[2] * mm.elements[11] + mm.elements[1] * mm.elements[14] * mm.elements[11] +
+				mm.elements[9] * mm.elements[2] * mm.elements[15] - mm.elements[1] * mm.elements[10] * mm.elements[15]
+				);
+			m.elements[2] = inv_det * (
+				mm.elements[5] * mm.elements[14] * mm.elements[3] - mm.elements[13] * mm.elements[6] * mm.elements[3] +
+				mm.elements[13] * mm.elements[2] * mm.elements[7] - mm.elements[1] * mm.elements[14] * mm.elements[7] -
+				mm.elements[5] * mm.elements[2] * mm.elements[15] + mm.elements[1] * mm.elements[6] * mm.elements[15]
+				);
+			m.elements[3] = inv_det * (
+				mm.elements[9] * mm.elements[6] * mm.elements[3] - mm.elements[5] * mm.elements[10] * mm.elements[3] -
+				mm.elements[9] * mm.elements[2] * mm.elements[7] + mm.elements[1] * mm.elements[10] * mm.elements[7] +
+				mm.elements[5] * mm.elements[2] * mm.elements[11] - mm.elements[1] * mm.elements[6] * mm.elements[11]
+				);
+			m.elements[4] = inv_det * (
+				mm.elements[12] * mm.elements[10] * mm.elements[7] - mm.elements[8] * mm.elements[14] * mm.elements[7] -
+				mm.elements[12] * mm.elements[6] * mm.elements[11] + mm.elements[4] * mm.elements[14] * mm.elements[11] +
+				mm.elements[8] * mm.elements[6] * mm.elements[15] - mm.elements[4] * mm.elements[10] * mm.elements[15]
+				);
+			m.elements[5] = inv_det * (
+				mm.elements[8] * mm.elements[14] * mm.elements[3] - mm.elements[12] * mm.elements[10] * mm.elements[3] +
+				mm.elements[12] * mm.elements[2] * mm.elements[11] - mm.elements[0] * mm.elements[14] * mm.elements[11] -
+				mm.elements[8] * mm.elements[2] * mm.elements[15] + mm.elements[0] * mm.elements[10] * mm.elements[15]
+				);
+			m.elements[6] = inv_det * (
+				mm.elements[12] * mm.elements[6] * mm.elements[3] - mm.elements[4] * mm.elements[14] * mm.elements[3] -
+				mm.elements[12] * mm.elements[2] * mm.elements[7] + mm.elements[0] * mm.elements[14] * mm.elements[7] +
+				mm.elements[4] * mm.elements[2] * mm.elements[15] - mm.elements[0] * mm.elements[6] * mm.elements[15]
+				);
+			m.elements[7] = inv_det * (
+				mm.elements[4] * mm.elements[10] * mm.elements[3] - mm.elements[8] * mm.elements[6] * mm.elements[3] +
+				mm.elements[8] * mm.elements[2] * mm.elements[7] - mm.elements[0] * mm.elements[10] * mm.elements[7] -
+				mm.elements[4] * mm.elements[2] * mm.elements[11] + mm.elements[0] * mm.elements[6] * mm.elements[11]
+				);
+			m.elements[8] = inv_det * (
+				mm.elements[8] * mm.elements[13] * mm.elements[7] - mm.elements[12] * mm.elements[9] * mm.elements[7] +
+				mm.elements[12] * mm.elements[5] * mm.elements[11] - mm.elements[4] * mm.elements[13] * mm.elements[11] -
+				mm.elements[8] * mm.elements[5] * mm.elements[15] + mm.elements[4] * mm.elements[9] * mm.elements[15]
+				);
+			m.elements[9] = inv_det * (
+				mm.elements[12] * mm.elements[9] * mm.elements[3] - mm.elements[8] * mm.elements[13] * mm.elements[3] -
+				mm.elements[12] * mm.elements[1] * mm.elements[11] + mm.elements[0] * mm.elements[13] * mm.elements[11] +
+				mm.elements[8] * mm.elements[1] * mm.elements[15] - mm.elements[0] * mm.elements[9] * mm.elements[15]
+				);
+			m.elements[10] = inv_det * (
+				mm.elements[4] * mm.elements[13] * mm.elements[3] - mm.elements[12] * mm.elements[5] * mm.elements[3] +
+				mm.elements[12] * mm.elements[1] * mm.elements[7] - mm.elements[0] * mm.elements[13] * mm.elements[7] -
+				mm.elements[4] * mm.elements[1] * mm.elements[15] + mm.elements[0] * mm.elements[5] * mm.elements[15]
+				);
+			m.elements[11] = inv_det * (
+				mm.elements[8] * mm.elements[5] * mm.elements[3] - mm.elements[4] * mm.elements[9] * mm.elements[3] -
+				mm.elements[8] * mm.elements[1] * mm.elements[7] + mm.elements[0] * mm.elements[9] * mm.elements[7] +
+				mm.elements[4] * mm.elements[1] * mm.elements[11] - mm.elements[0] * mm.elements[5] * mm.elements[11]
+				);
+			m.elements[12] = inv_det * (
+				mm.elements[12] * mm.elements[9] * mm.elements[6] - mm.elements[8] * mm.elements[13] * mm.elements[6] -
+				mm.elements[12] * mm.elements[5] * mm.elements[10] + mm.elements[4] * mm.elements[13] * mm.elements[10] +
+				mm.elements[8] * mm.elements[5] * mm.elements[14] - mm.elements[4] * mm.elements[9] * mm.elements[14]
+				);
+			m.elements[13] = inv_det * (
+				mm.elements[8] * mm.elements[13] * mm.elements[2] - mm.elements[12] * mm.elements[9] * mm.elements[2] +
+				mm.elements[12] * mm.elements[1] * mm.elements[10] - mm.elements[0] * mm.elements[13] * mm.elements[10] -
+				mm.elements[8] * mm.elements[1] * mm.elements[14] + mm.elements[0] * mm.elements[9] * mm.elements[14]
+				);
+			m.elements[14] = inv_det * (
+				mm.elements[12] * mm.elements[5] * mm.elements[2] - mm.elements[4] * mm.elements[13] * mm.elements[2] -
+				mm.elements[12] * mm.elements[1] * mm.elements[6] + mm.elements[0] * mm.elements[13] * mm.elements[6] +
+				mm.elements[4] * mm.elements[1] * mm.elements[14] - mm.elements[0] * mm.elements[5] * mm.elements[14]
+				);
+			m.elements[15] = inv_det * (
+				mm.elements[4] * mm.elements[9] * mm.elements[2] - mm.elements[8] * mm.elements[5] * mm.elements[2] +
+				mm.elements[8] * mm.elements[1] * mm.elements[6] - mm.elements[0] * mm.elements[9] * mm.elements[6] -
+				mm.elements[4] * mm.elements[1] * mm.elements[10] + mm.elements[0] * mm.elements[5] * mm.elements[10]
+				);
+
+			return m;
 		}
 	}
 }

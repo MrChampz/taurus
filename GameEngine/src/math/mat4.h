@@ -29,6 +29,7 @@ namespace Taurus
 			static mat4 identity();
 
 			mat4& multiply(const mat4& other);
+			friend vec4 operator*(mat4 left, const vec4& right);
 			friend mat4 operator*(mat4 left, const mat4& right);
 			mat4& operator*=(const mat4& other);
 
@@ -38,6 +39,9 @@ namespace Taurus
 			static mat4 translation(const vec3& translation);
 			static mat4 rotation(float angle, const vec3& axis);
 			static mat4 scale(const vec3& scale);
+
+			static float determinant(const mat4& mm);
+			static mat4 inverse(const mat4& mm);
 		};
 	}
 }

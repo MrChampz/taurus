@@ -32,6 +32,18 @@
     <ClInclude Include="src\graphics\buffers\buffer.h" />
     <ClInclude Include="src\graphics\buffers\indexbuffer.h" />
     <ClInclude Include="src\graphics\buffers\vertexarray.h" />
+    <ClInclude Include="src\graphics\renderable2d.h" />
+    <ClInclude Include="src\graphics\renderer2d.h" />
+    <ClInclude Include="src\graphics\simple2drenderer.h" />
+    <ClInclude Include="src\graphics\batchrenderer2D.h" />
+    <ClInclude Include="src\graphics\sprite.h" />
+    <ClInclude Include="src\graphics\static_sprite.h" />
+    <ClInclude Include="src\utils\timer.h" />
+    <ClInclude Include="src\graphics\gameobject.h" />
+    <ClInclude Include="src\graphics\cube.h" />
+    <ClInclude Include="src\graphics\batchrenderer3d.h" />
+    <ClInclude Include="src\graphics\camera.h" />
+    <ClInclude Include="src\math\quat.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\graphics\window.cpp">
@@ -50,6 +62,14 @@
     <ClCompile Include="src\graphics\buffers\buffer.cpp" />
     <ClCompile Include="src\graphics\buffers\indexbuffer.cpp" />
     <ClCompile Include="src\graphics\buffers\vertexarray.cpp" />
+    <ClCompile Include="src\graphics\simple2drenderer.cpp" />
+    <ClCompile Include="src\graphics\batchrenderer2d.cpp" />
+    <ClCompile Include="src\graphics\sprite.cpp" />
+    <ClCompile Include="src\graphics\static_sprite.cpp" />
+    <ClCompile Include="src\graphics\cube.cpp" />
+    <ClCompile Include="src\graphics\batchrenderer3d.cpp" />
+    <ClCompile Include="src\graphics\camera.cpp" />
+    <ClCompile Include="src\math\quat.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GameEngine.rc" />

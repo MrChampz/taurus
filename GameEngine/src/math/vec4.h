@@ -20,6 +20,7 @@ namespace Taurus
 
 			friend vec4 operator+(vec4 left, const vec4& right);
 			friend vec4 operator-(vec4 left, const vec4& right);
+			friend vec4 operator*(vec4 left, const float& right);
 			friend vec4 operator*(vec4 left, const vec4& right);
 			friend vec4 operator/(vec4 left, const vec4& right);
 

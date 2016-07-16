@@ -54,6 +54,28 @@ namespace Taurus
 			return *this;
 		}
 
+		vec3& vec3::cross(const vec3& other)
+		{
+			vec3 r;
+
+			r.x = y * other.z - z * other.y;
+			r.y = z * other.x - x * other.z;
+			r.z = x * other.y - y * other.x;
+
+			return r;
+		}
+
+		vec3& vec3::normalize()
+		{
+			const float length = sqrtf(x * x + y * y + z * z);
+
+			x /= length;
+			y /= length;
+			z /= length;
+
+			return *this;
+		}
+
 		vec3 operator+(vec3 left, const vec3& right)
 		{
 			return left.add(right);
@@ -62,6 +84,15 @@ namespace Taurus
 		vec3 operator-(vec3 left, const vec3& right)
 		{
 			return left.subtract(right);
+		}
+
+		vec3 operator*(vec3 left, const float& right)
+		{
+			vec3 vc;
+			vc.x = left.x * right;
+			vc.y = left.y * right;
+			vc.z = left.z * right;
+			return vc;
 		}
 
 		vec3 operator*(vec3 left, const vec3& right)

@@ -62,6 +62,16 @@ namespace Taurus
 			return left.subtract(right);
 		}
 
+		vec4 operator*(vec4 left, const float& right)
+		{
+			vec4 vc;
+			vc.x = left.x * right;
+			vc.y = left.y * right;
+			vc.z = left.z * right;
+			vc.w = left.w * right;
+			return vc;
+		}
+
 		vec4 operator*(vec4 left, const vec4& right)
 		{
 			return left.multiply(right);

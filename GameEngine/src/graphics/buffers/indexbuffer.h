@@ -13,7 +13,9 @@ namespace Taurus
 			GLuint m_Count;
 
 		public:
+			IndexBuffer(GLuint* data, GLsizei count);
 			IndexBuffer(GLushort* data, GLsizei count);
+			~IndexBuffer();
 
 			void bind() const;
 			void unbind() const;

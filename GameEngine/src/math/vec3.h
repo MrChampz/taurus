@@ -17,9 +17,12 @@ namespace Taurus
 			vec3& subtract(const vec3& other);
 			vec3& multiply(const vec3& other);
 			vec3& divide(const vec3& other);
+			vec3& cross(const vec3& other);
+			vec3& normalize();
 
 			friend vec3 operator+(vec3 left, const vec3& right);
 			friend vec3 operator-(vec3 left, const vec3& right);
+			friend vec3 operator*(vec3 left, const float& right);
 			friend vec3 operator*(vec3 left, const vec3& right);
 			friend vec3 operator/(vec3 left, const vec3& right);
 

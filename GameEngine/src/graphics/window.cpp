@@ -53,12 +53,23 @@ namespace Taurus
 			glfwSetKeyCallback(m_Window, key_callback);
 			glfwSetMouseButtonCallback(m_Window, mouse_button_callback);
 			glfwSetCursorPosCallback(m_Window, cursor_position_callback);
+			//glfwSwapInterval(0.0);
 
 			if (glewInit()  != GLEW_OK)
 			{
 				std::cout << "Could not initialize GLEW" << std::endl;
 				return false;
 			}
+
+			/*
+			glEnable(GL_DEPTH_TEST); // enable depth-testing
+			glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
+			glEnable(GL_CULL_FACE); // cull face
+			glCullFace(GL_BACK); // cull back face
+			glFrontFace(GL_CCW); // set counter-clock-wise vertex order to mean the front
+			glClearColor(0.2, 0.2, 0.2, 1.0); // grey background to help spot mistakes
+			glViewport(0, 0, getWidth(), getHeight());
+			*/
 
 			std::cout << "OpenGL " << glGetString(GL_VERSION) << std::endl;
 			return true;
@@ -86,6 +97,21 @@ namespace Taurus
 		{
 			x = mx;
 			y = my;
+		}
+
+		void Window::setMousePosition(const double x, const double y) const
+		{
+			glfwSetCursorPos(m_Window, x, y);
+		}
+
+		void Window::showCursor() const
+		{
+			glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
+
+		void Window::hideCursor() const
+		{
+			glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		}
 
 		void Window::clear() const
